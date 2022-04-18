@@ -51,7 +51,7 @@ CMatrix CreateRotate2D(double fi)
 // fi - угол в градусах
 {
 	double fg = fmod(fi, 360.0);
-	double ff = (fg / 180.0) * pi; // Перевод в радианы
+	double ff = (fg / 180.0)*pi; // Перевод в радианы
 	CMatrix RM(3, 3);
 	RM(0, 0) = cos(ff); RM(0, 1) = -sin(ff);
 	RM(1, 0) = sin(ff);  RM(1, 1) = cos(ff);
@@ -114,13 +114,11 @@ void SetMyMode(CDC& dc, CRectD& RS, CRect& RW)
 
 CSunSystem::CSunSystem()            //  Конструктор по умолчанию
 {
-	double rS = 30, rE = 20, rM = 10, rV = 15;				// Радиус Солнца, Земли, Луны
-	double rMerc = 7;		// радиус планеты
-	double rAst = 10;
+	double rS = 30, rE = 20, rM = 10, rV = 15;       // Радиус Солнца, Земли, Луны
+	double rP = 10;
 
-	double RoE = 10 * rS, RoM = 5 * rE, RoV = 6 * rS;		// Радиус орбиты Земли и Луны
-	double RoMerc = 15 * rMerc;		// радиус орбиты
-	double RoAst = 10 * rAst;
+	double RoE = 10 * rS, RoM = 5 * rE, RoV = 6*rS;	 // Радиус орбиты Земли и Луны
+	double RoP = 5 * rM;
 
 	double d = RoE + RoM + rM + RoV;		    // Половина диаметра системы
 	RS.SetRectD(-d, d, d, -d);					// Область системы в мировых координатах
@@ -128,62 +126,48 @@ CSunSystem::CSunSystem()            //  Конструктор по умолчанию
 	Sun.SetRect(-rS, rS, rS, -rS);				// Прямоугольник солнца - для рисования круга
 	Earth.SetRect(-rE, rE, rE, -rE);			// Прямоугольник Земли - для рисования круга
 	Moon.SetRect(-rM, rM, rM, -rM);				// Прямоугольник Луны - для рисования круга
-	Mars.SetRect(-rV, rV, rV, -rV);				// Прямоугольник Марса - для рисования круга
-	Mercury.SetRect(-rMerc, rMerc, rMerc, -rMerc);		// прямоугольник для круга
-	Asteroid.SetRect(-rAst, rAst, -rAst, rAst);
+	Mars.SetRect(-rV, rV, rV, -rV);
+	Phobos.SetRect(-rP, rP, rP, -rP);
 
 	EarthOrbit.SetRect(-RoE, RoE, RoE, -RoE);	// Прямоугольник орбиты Земли - для рисования круга
 	MoonOrbit.SetRect(-RoM, RoM, RoM, -RoM);	// Прямоугольник орбиты Луны - для рисования круга
-	MarsOrbit.SetRect(-RoV, RoV, RoV, -RoV);	// Прямоугольник орбиты Марса - для рисования круга
-	MercuryOrbit.SetRect(-RoMerc, RoMerc, RoMerc, -RoMerc);		// прямоугольник для орбиты
-	AstOrbit.SetRect(-RoAst, RoAst, -RoAst, RoAst);
+	MarsOrbit.SetRect(-RoV, RoV, RoV, -RoV);
+	PhobosOrbit.SetRect(-RoP, RoP, RoP, -RoP);
 
 	fiE = 0;			// Угловое положение Земли в системе кординат Солнца, град
 	fiM = 0;			// Угловое положение Луны в системе кординат Земли, град
 	fiV = 1;
-	fiMerc = 100;
-	fiAst = 1;
+	fiP = 0;
 
 	wEarth = 5;			// Угловая скорость Земли в системе кординат Солнца, град/сек.
 	wMoon = 50;			// Угловая скорость Луны в системе кординат Земли, град/сек.
 	wMars = -8;
-	wMerc = 40;
-	wAst = 50;
+	wPhobos = -30;
 
 	dt = 0.1;
 	MCoords.RedimMatrix(3);
 	ECoords.RedimMatrix(3);
 	VCoords.RedimMatrix(3);	
-	MercCoords.RedimMatrix(3);	
-	AstCoords.RedimMatrix(3);
+	PCoords.RedimMatrix(3);
 }
-
 
 void CSunSystem::SetNewCoords()
 //Вычисляет новые координаты планет в СК Солнца через интервал времени dt
 {
-
-
-
 	double RoM = (MoonOrbit.right - MoonOrbit.left) / 2;// Радиус орбиты Луны    
-	double ff = (fiM / 180.0) * pi;						// Радианы - угловое положение Луны в СК Земли
+	double ff = (fiM / 180.0)*pi;						// Радианы - угловое положение Луны в СК Земли
 	double x = RoM * cos(ff);							// x - начальная координата Луны в СК Земли
 	double y = RoM * sin(ff);							// y - начальная координата Луны в СК Земли	
-	MCoords(0) = x;	
-	MCoords(1) = y;   
-	MCoords(2) = 1;
+	MCoords(0) = x;	MCoords(1) = y;   MCoords(2) = 1;
 	fiM += wMoon * dt;
 	CMatrix P = CreateRotate2D(fiM);					// Матрица поворота против часовой стрелки Луны
 	MCoords = P * MCoords;
-
 
 	double RoE = (EarthOrbit.right - EarthOrbit.left) / 2;// Радиус орбиты Земли
 	ff = (fiE / 180.0)*pi;								// Радианы - угловое положение Земли в СК Солнца
 	x = RoE * cos(ff);									// x - начальная координата Земли в СК Солнца
 	y = RoE * sin(ff);									// y - начальная координата Земли в СК Солнца
-	ECoords(0) = x;	
-	ECoords(1) = y;   
-	ECoords(2) = 1;
+	ECoords(0) = x;	ECoords(1) = y;   ECoords(2) = 1;
 	P = CreateTranslate2D(x,y);
 	MCoords = P * MCoords;
 
@@ -194,76 +178,71 @@ void CSunSystem::SetNewCoords()
 
 
 
+	// ==============================  PHOBOS  ==============================
+
+	double RoP = (PhobosOrbit.right - PhobosOrbit.left) / 2;
+	ff = (fiP / 180.0) * pi;
+	x = RoP * cos(ff);
+	y = RoP * sin(ff);
+	PCoords(0) = x;
+	PCoords(1) = y;
+	PCoords(2) = 1;
+	fiP += wPhobos * dt;
+	P = CreateRotate2D(fiP);
+	PCoords = P * PCoords;
 
 
-	//double RoAst = (AstOrbit.right - AstOrbit.left);
-	//ff = (fiAst / 180.0) * pi;
-	//x = RoAst * cos(ff);
-	//y = RoAst * sin(ff);
-	//AstCoords(0) = x;
-	//AstCoords(1) = y;
-	//AstCoords(2) = 1;
-	//fiAst += wAst * dt;
-	//P = CreateRotate2D(fiAst);
-	//AstCoords = P * AstCoords;
 
-
-
-	double RoV = (MarsOrbit.right - MarsOrbit.left) / 2;// Радиус орбиты Марса
-	ff = (fiV / 180.0) * pi;							// Радианы - угловое положение Марса в СК Солнца
-	x = RoV * cos(ff);									// x - начальная координата Марса в СК Солнца
-	y = RoV * sin(ff);									// y - начальная координата Марса в СК Солнца
-	VCoords(0) = x;										// текущие координаты
+	double RoV = (MarsOrbit.right - MarsOrbit.left) / 2;
+	ff = (fiV / 180.0)*pi;
+	x = RoV * cos(ff);
+	y = RoV * sin(ff);
+	VCoords(0) = x;
 	VCoords(1) = y;
 	VCoords(2) = 1;
 
-	//P = CreateTranslate2D(x, y);
-	//AstCoords = P * AstCoords;
+	// new in Mars
+	P = CreateTranslate2D(x, y);
+	PCoords = P * PCoords;
+	// new in Mars
 
 	fiV += wMars * dt;
-	P = CreateRotate2D(fiV);							// поворот Марса
+	P = CreateRotate2D(fiV);
 	VCoords = P * VCoords;
-	//AstCoords = P * AstCoords;
 
-
-
-	double RoMerc = (MercuryOrbit.right - MercuryOrbit.left) / 2;
-	ff = (fiMerc / 180.0) * pi;
-	x = RoMerc * cos(ff);
-	y = RoMerc * sin(ff);
-	MercCoords(0) = x;
-	MercCoords(1) = y;
-	MercCoords(2) = 1;
-
-	fiMerc += wMerc * dt;
-	P = CreateRotate2D(fiMerc);
-	MercCoords = P * MercCoords;
+	// new in Mars
+	PCoords = P * PCoords;
+	// new in Mars
 }
 
 
 void CSunSystem::Draw(CDC& dc)
 {
-	CBrush SBrush, EBrush, MBrush, VBrush, * pOldBrush, MercBrush; //, AstBrush;
+	CBrush SBrush, EBrush, MBrush, VBrush, *pOldBrush;
+	CBrush PBrush;
 	CRect R;
 
 	SBrush.CreateSolidBrush(RGB(255, 0, 0));
 	EBrush.CreateSolidBrush(RGB(0, 0, 255));
 	MBrush.CreateSolidBrush(RGB(0, 255, 0));
 	VBrush.CreateSolidBrush(RGB(128,64,64));
-	VBrush.CreateSolidBrush(RGB(128,64,64));
-	MercBrush.CreateSolidBrush(RGB(176, 0, 0));
-	//AstBrush.CreateSolidBrush(RGB(255, 123, 41));
+	PBrush.CreateSolidBrush(RGB(255, 106, 0));
+
 
 	// Рисуем орбиты
 	dc.SelectStockObject(NULL_BRUSH);		// Белая кисть - не надо соэдавать
 	dc.Ellipse(EarthOrbit);					// Орбита Земли
 	dc.Ellipse(MarsOrbit);
-	dc.Ellipse(MercuryOrbit);
-	//dc.Ellipse(AstOrbit);
 
 	int d = MoonOrbit.right;				// Радиус орбиты Луны
-	R.SetRect(ECoords(0) - d, ECoords(1) + d, ECoords(0) + d, ECoords(1) - d);	// рисуем Луну около Земли
+	R.SetRect(ECoords(0) - d, ECoords(1) + d, ECoords(0) + d, ECoords(1) - d);
 	dc.Ellipse(R);							// Орбита Луны
+
+	// new: Phobos
+	int p = PhobosOrbit.right;
+	R.SetRect(VCoords(0) - p, VCoords(1) + p, VCoords(0) + p, VCoords(1) - p);
+	dc.Ellipse(R);
+
 
 // Рисуем Солнце
 	pOldBrush = dc.SelectObject(&SBrush);	// Цвет Солнца
@@ -282,15 +261,15 @@ void CSunSystem::Draw(CDC& dc)
 	dc.Ellipse(R);	// Луна
 
 // Рисуем Марс
-	d = Mars.right;							// Радиус Марса
+	d = Mars.right;
 	R.SetRect(VCoords(0) - d, VCoords(1) + d, VCoords(0) + d, VCoords(1) - d);
-	dc.SelectObject(&VBrush);				// Цвет Марса
-	dc.Ellipse(R);							// Сам Марс
+	dc.SelectObject(&VBrush);
+	dc.Ellipse(R);
 
-// Рисуем Меркурий!
-	d = Mercury.right;
-	R.SetRect(MercCoords(0) - d, MercCoords(1) + d, MercCoords(0) + d, MercCoords(1) - d);
-	dc.SelectObject(&MercBrush);
+// Рисуем Фобос
+	d = Phobos.right;
+	R.SetRect(PCoords(0) - d, PCoords(1) + d, PCoords(0) + d, PCoords(1) - d);
+	dc.SelectObject(&PBrush);
 	dc.Ellipse(R);
 
 	dc.SelectObject(pOldBrush);				//Восстанавливаем контекст по pOldBrush 

@@ -34,38 +34,34 @@ class CSunSystem
 	CRect Sun;		   // Прямоугольник Солнца
 	CRect Earth;	   // Прямоугольник Земли
 	CRect Moon;		   // Прямоугольник Луны
-	CRect Mars;		   // Прямоугольник Марса
-	CRect Mercury;				// Прямоугольник Меркурия
-	CRect Asteroid;
+	CRect Mars;
+	CRect Phobos;
 
 	CRect EarthOrbit;  // Прямоугольник, описанный вокруг орбиты Земли
 	CRect MoonOrbit;   // Прямоугольник, описанный вокруг орбиты Луны
-	CRect MarsOrbit;   // Прямоугольник, описанный вокруг орбиты Марса
-	CRect MercuryOrbit;		// Прямоугольник, описанный вокруг орбиты Марса
-	CRect AstOrbit;
+	CRect MarsOrbit;
+	CRect PhobosOrbit;
 
 	CMatrix ECoords;   // Текущие координаты Земли в СК Солнца ( x,y,1)
 	CMatrix MCoords;   // Текущие координаты Луны в СК Земли ( x,y,1)
-	CMatrix VCoords;   // Текущие координаты Марса
-	CMatrix MercCoords;			// Текущие координаты Марса
-	CMatrix AstCoords;
+	CMatrix VCoords;
+	CMatrix PCoords;
 
 	CRect RW;		   // Прямоугольник в окне
 	CRectD RS;		   // Прямоугольник области в МСК
 
 	double wEarth;	   // Угловая скорость Земли относительно Солнца, град./сек.
 	double wMoon;	   // Угловая скорость Земли относительно Солнца, град./сек.
-	double wMars;	   // Угловая скорость Марса относительно Солнца, град./сек.
-	double wMerc;			// Угловая скорость Меркурия относительно Солнца, град./сек.
-	double wAst;
+	double wMars;
+	double wPhobos;
 
 	double fiE;		   // Угловое положение Земли в системе координат Солнца, град
 	double fiM;		   // Угловое положение Луны в системе координат Земли, град
-	double fiV;		   // Угловое положение Марса в системе координат Солнца, град
-	double fiMerc;				// Угловое положение Меркурия в системе координат Солнца, град
-	double fiAst;
+	double fiV;
+	double fiP;
 
 	double dt;		   // Интервал дискретизации, сек.
+
 public:
 	CSunSystem();
 	void SetDT(double dtx) { dt = dtx; };	// Установка интервала дискретизации
